@@ -1,0 +1,101 @@
+$if($noop( 1. If %albumartist% != Various Artists )
+		$ne(%albumartist%,Various Artists),
+		$noop(replace special characters and spaces)
+			$replace($rreplace($left($if2(%albumartist%,%artist%),1)/
+			$if2($left($if2(%albumartist%,%artist%),$find($if2(%albumartist%,%artist%),;)),$if2(%albumartist%,%artist%))/
+			$if2($if(%originalyear%,[$left(%originalyear%,4)] )
+				,$if(%originaldate%,[$left(%originaldate%,4)] )
+				,$if(%date%,[$left(%date%,4)] ))
+			$noop( limit album name output to 120 characters )
+			$left( $replace(%album%,/,), 120)
+			$if2(
+				$if($gte(%totaldiscs%,10000),		$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
+				,$if($gte(%totaldiscs%,1000),		$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
+				,$if($gte(%totaldiscs%,100),		$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
+				,$if($gte(%totaldiscs%,10),			$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
+				,$if($gt(%totaldiscs%,1),				$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
+			) [$noop(DSD is always '1bit' so only output this if greater than 1)
+			$if($gt(%_bits_per_sample%,1),%_bits_per_sample%bit )
+			$div(%_sample_rate%,1000)$if($ne($mod(%_sample_rate%,1000),0),.$left($mod(%_sample_rate%,1000),1))kHz
+
+			$noop($if($not($or($eq(%_extension%,dsf),$eq(%_extension%,dff),$eq(%_extension%,dsd))),$upper( %_extension%)))
+			$if($not($eq_any(%_extension%,dsf,dff,dsd)),$upper( %_extension%))
+
+			$if($in(%media%,Vinyl), Vinyl)
+
+			$noop($if($or($eq(%_extension%,dsf),$eq(%_extension%,dff),$eq(%_extension%,dsd)), DSD))
+			$if($eq_any(%_extension%,dsf,dff,dsd), DSD)$noop(Output this befire SACD because there are Vinyl rips recorded in DSD)
+
+			$if($in(%media%,SACD), SACD)
+
+			] $if($gt(%_channels%,2), %_channels%Ch)
+		/
+			$if2(
+				$if(
+					$and(
+						$in(%media%,Vinyl)
+						,%_musicbrainz_tracknumber%
+					)
+					,%_musicbrainz_tracknumber%
+				)
+				,$if(%_paddedtracknumber%,%_paddedtracknumber%)
+				,$if($gte(%totaltracks%,10000),		$if(%tracknumber%,$num(%tracknumber%,5)),)
+				,$if($gte(%totaltracks%,1000),		$if(%tracknumber%,$num(%tracknumber%,4)),)
+				,$if($gte(%totaltracks%,100),			$if(%tracknumber%,$num(%tracknumber%,3)),)
+				,$if($gte(%totaltracks%,10),			$if(%tracknumber%,$num(%tracknumber%,2)),)
+				,$if($gte(%totaltracks%,1),				$if(%tracknumber%,$num(%tracknumber%,2)),)
+				$noop(,$if(%tracknumber%,$num(%tracknumber%,2)))
+			). $left(%title%,120),[:?"_]+,
+			),  , $noop(Replace double spaces with just one)
+		)
+
+	,$noop( initial \$if 'else' statement: )
+
+			$replace($rreplace($if($eq(%albumartist%,Various Artists),[Various Artists])/
+			$noop( limit album name output to 120 characters )
+			$left( $replace(%album%,/,), 120)
+			$if2(
+				$if($gte(%totaldiscs%,10000),		$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
+				,$if($gte(%totaldiscs%,1000),		$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
+				,$if($gte(%totaldiscs%,100),		$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
+				,$if($gte(%totaldiscs%,10),			$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
+				,$if($gt(%totaldiscs%,1),				$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
+			) $if2($if(%originalyear%,[$left(%originalyear%,4)] )
+				,$if(%originaldate%,[$left(%originaldate%,4)] )
+				,$if(%date%,[$left(%date%,4)] ))
+				[$noop(DSD is always '1bit' so only output this if greater than 1)
+			$if($gt(%_bits_per_sample%,1),%_bits_per_sample%bit )
+			$div(%_sample_rate%,1000)$if($ne($mod(%_sample_rate%,1000),0),.$left($mod(%_sample_rate%,1000),1))kHz
+
+			$noop($if($not($or($eq(%_extension%,dsf),$eq(%_extension%,dff),$eq(%_extension%,dsd))),$upper( %_extension%)))
+			$if($not($eq_any(%_extension%,dsf,dff,dsd)),$upper( %_extension%))
+
+			$if($in(%media%,Vinyl), Vinyl)
+
+			$noop($if($or($eq(%_extension%,dsf),$eq(%_extension%,dff),$eq(%_extension%,dsd)), DSD))
+			$if($eq_any(%_extension%,dsf,dff,dsd), DSD)$noop(Output this befire SACD because there are Vinyl rips recorded in DSD)
+
+			$if($in(%media%,SACD), SACD)
+
+			] $if($gt(%_channels%,2), %_channels%Ch)
+		/
+			$if2(
+				$if(
+					$and(
+						$in(%media%,Vinyl)
+						,%_musicbrainz_tracknumber%
+					)
+					,%_musicbrainz_tracknumber%
+				)
+				,$if(%_paddedtracknumber%,%_paddedtracknumber%)
+				,$if($gte(%totaltracks%,10000),		$if(%tracknumber%,$num(%tracknumber%,5)),)
+				,$if($gte(%totaltracks%,1000),		$if(%tracknumber%,$num(%tracknumber%,4)),)
+				,$if($gte(%totaltracks%,100),			$if(%tracknumber%,$num(%tracknumber%,3)),)
+				,$if($gte(%totaltracks%,10),			$if(%tracknumber%,$num(%tracknumber%,2)),)
+				,$if($gte(%totaltracks%,1),				$if(%tracknumber%,$num(%tracknumber%,2)),)
+				$noop(,$if(%tracknumber%,$num(%tracknumber%,2)))
+			). $left(%title%,120),[:?"_]+,
+			),  , $noop(Replace double spaces with just one)
+		)
+
+)
