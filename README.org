@@ -9,6 +9,24 @@
 "Tangling" is an Org Mode feature that extracts code blocks into a
 target file, see the =:header-args:= metadata for this section.
 
+*** Note about indentation
+
+- *NOTE*: Indentation is done using TABs and NEWLINEs because even
+  though Picard doesn't seem to delete them, they should be ignored by
+  filesystems anyway.
+
+  Likewise any SPACE character seen in the script DOES matter and goes
+  to the final filename, if not held by an =$if= statement.
+#+begin_src picard
+$noop(
+		NOTE: Indentation is done using TABs because even though picard doesn't
+		seem to delete them, they should be ignored by filesystems anyway.
+
+		Likewise any SPACE character seen here DOES matter and goes to the
+		final filename if not held by an \$if statement.
+)
+#+end_src
+
 *** Summary
 This script is used to organize and format the file names of audio
 tracks in MusicBrainz Picard, a free and open-source software tool for
@@ -250,29 +268,15 @@ $if(%notVariousArtists%
 
 
 
-*** Note about indentation
-
-- *NOTE*: Indentation is done using TABs because even though Picard
-  doesn't seem to delete them, they should be ignored by filesystems anyway.
-
-  Likewise any SPACE character seen in the script DOES matter and goes
-  to the final filename, if not held by an =$if= statement.
-#+begin_src picard
-$noop(
-		NOTE: Indentation is done using TABs because even though picard doesn't
-		seem to delete them, they should be ignored by filesystems anyway.
-
-		Likewise any SPACE character seen here DOES matter and goes to the
-		final filename if not held by an \$if statement.
-)
-#+end_src
-
 *** Credits
 - Adapted from thebradleys' naming script:
   [[https://community.metabrainz.org/t/repository-for-neat-file-name-string-patterns-and-tagger-script-snippets/2786/4][Repository for neat file name string patterns and tagger script snippets#4]]
 
 - Influenced by Fatal-Picard-Script:
   [[https://github.com/rickeymandraque/Fatal-Picard-Script/blob/master/nocomment.picard][rickeymandraque/Fatal-Picard-Script/nocomment.picard]]
+
+*** Cool References
+- [[https://github.com/rdswift/picard-scripts][rdswift/picard-scripts]]
 
 *** Version History
 # - 2022-03-23: Initial release 0.2

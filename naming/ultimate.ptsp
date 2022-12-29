@@ -1,3 +1,11 @@
+$noop(
+		NOTE: Indentation is done using TABs because even though picard doesn't
+		seem to delete them, they should be ignored by filesystems anyway.
+
+		Likewise any SPACE character seen here DOES matter and goes to the
+		final filename if not held by an \$if statement.
+)
+
 $set(checkPadDiscNumber
 	,$if2(
 		$if($gte(%totaldiscs%,10000),		$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
@@ -111,12 +119,4 @@ $set(generalSanitized
 $if(%notVariousArtists%
 	,%generalSanitized%
 	,%VASanitized%
-)
-
-$noop(
-		NOTE: Indentation is done using TABs because even though picard doesn't
-		seem to delete them, they should be ignored by filesystems anyway.
-
-		Likewise any SPACE character seen here DOES matter and goes to the
-		final filename if not held by an \$if statement.
 )
