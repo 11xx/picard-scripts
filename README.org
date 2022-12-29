@@ -1,0 +1,279 @@
+#+TITLE: MusicBrainz Picard Tagging & Naming Scripts
+* Naming Scripts
+** =ultimate=: General Naming Script
+:PROPERTIES:
+:header-args: :tangle naming/ultimate.ptsp
+:END:
+
+*** Tangling
+"Tangling" is an Org Mode feature that extracts code blocks into a
+target file, see the =:header-args:= metadata for this section.
+
+*** Summary
+This script is used to organize and format the file names of audio
+tracks in MusicBrainz Picard, a free and open-source software tool for
+organizing and formatting audio file metadata.
+
+This is the third iteration from an old script.
+# The following script is an adaptation from the great [[https://community.metabrainz.org/t/repository-for-neat-file-name-string-patterns-and-tagger-script-snippets/2786/4][thebradleys' naming script]]
+
+*** Features
+- Formats track numbers and disc numbers with leading zeros to ensure
+  proper sorting
+- Includes media formats and/or extensions in the filepath, including
+  DSD, SACD, and Vinyl
+- Allows for customization with compartmentalized variables
+- Includes logic for handling tracks by various artists
+
+*** Usage
+To use this script in MusicBrainz Picard, follow these steps:
+
+1. Open MusicBrainz Picard and select the tracks you want to rename.
+2. Go to =Options= in menu bar, then click =Options= from dropdown menu
+# 2. Go to the "File" menu and choose "Rename Files."
+3. Select the "=File Naming=" tab
+4. Click the =Edit file naming script= button and add this naming script.
+
+*** Variables and Functions
+The script includes several variables and functions for formatting
+metadata fields, such as the artist name, album title, track number,
+and disc number:
+
+# - =checkPadDiscNumber=: Formats the disc number with leading zeros, based on the total number of discs in the album.
+# - =checkPadTrackNumber=: Formats the track number with leading zeros, based on the total number of tracks in the album.
+# - =mediaFormatSpec=: Outputs information about the media format, such as the bit depth and sample rate.
+# - =getInitial=: Extracts the first letter of the artist or album artist name.
+# - =getVariousArtists=: Returns the string "VA" if the album is a compilation of tracks by various artists.
+
+# *** Snippets / Variables
+
+**** Multi-disc release check
+This checks if the current release is a part of multiple discs
+release, add it to the album directory name with a padded number if
+necessary.
+#+begin_src picard
+$set(checkPadDiscNumber
+	,$if2(
+		$if($gte(%totaldiscs%,10000),		$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
+		,$if($gte(%totaldiscs%,1000),		$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
+		,$if($gte(%totaldiscs%,100),		$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
+		,$if($gte(%totaldiscs%,10),			$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
+		,$if($gt(%totaldiscs%,1),				$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
+	)
+)
+#+end_src
+
+**** Track number padding
+Similar to [[*Multi-disc release check][Multi-disc release check]] but it always adds the track
+number with at least a padding of 2, e.g. "=05=".
+#+begin_src picard
+$set(checkPadTrackNumber
+	,$if2(
+		$if(%_paddedtracknumber%,%_paddedtracknumber%)
+		,$if($gte(%totaltracks%,10000),		$if(%tracknumber%,$num(%tracknumber%,5)),)
+		,$if($gte(%totaltracks%,1000),		$if(%tracknumber%,$num(%tracknumber%,4)),)
+		,$if($gte(%totaltracks%,100),			$if(%tracknumber%,$num(%tracknumber%,3)),)
+		,$if($gte(%totaltracks%,10),			$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,1),				$if(%tracknumber%,$num(%tracknumber%,2)),)
+	)
+)
+#+end_src
+
+**** Media format information on album directory name
+Adds extension and media format information to the album name,
+including:
+- sampling rate
+- bit-depth
+- extension
+- special media (Vinyl, SACD, DSD)
+
+#+begin_src picard
+$set(mediaFormatSpec
+	$noop(DSD is always '1bit' so only output this if greater than 1)
+	,$if($gt(%_bits_per_sample%,1),%_bits_per_sample%bit )
+	$noop(#TODO: Fix Opus output here:)
+	$div(%_sample_rate%,1000)$if($ne($mod(%_sample_rate%,1000),0),.$left($mod(%_sample_rate%,1000),1))kHz
+	$if($not($eq_any(%_extension%,dsf,dff,dsd)),$upper( %_extension%))
+	$if($in(%media%,Vinyl), Vinyl)
+	$noop(Output this before SACD because there are Vinyl rips recorded in DSD)
+	$if($eq_any(%_extension%,dsf,dff,dsd), DSD)
+	$if($in(%media%,SACD), SACD)
+)
+
+#+end_src
+
+**** Get artist initial
+#+begin_src picard
+$set(getInitial
+	,$left($if2(%albumartist%,%artist%),1)
+)
+#+end_src
+
+**** Various Artists root directory
+Check if =%albumartist%= is =Various Artists= to use that as the artist
+root directory for releases that are such.
+#+begin_src picard
+$set(getVariousArtistsRoot
+	,$if($eq(%albumartist%,Various Artists),[Various Artists])
+)
+#+end_src
+
+**** Get release year
+Returns the first value of either =%originalyear%=, =%originaldate%= or
+=%date%=.
+
+#+begin_src picard
+$set(getReleaseYear
+	,$if2(
+		$if(%originalyear%,[$left(%originalyear%,4)] )
+		,$if(%originaldate%,[$left(%originaldate%,4)] )
+		,$if(%date%,[$left(%date%,4)] )
+	)
+)
+#+end_src
+
+**** Get album name truncated
+Truncates the album name from =%album%=.
+
+#+begin_src picard
+$noop( limit album name output to 120 characters )
+$set(getAlbumNameTruncated
+	,$left( $replace(%album%,/,), 120)
+)
+#+end_src
+
+**** Check if =%albumartist%= is =Various Artists=
+#+begin_src picard
+$set(notVariousArtists
+	,$ne(%albumartist%,Various Artists)
+)
+#+end_src
+
+**** Check for special vinyl track numbering
+Vinyl releases usually use a SIDE>TRACKNUMBER format like =A1=, =A2=, and
+=B3=, =B4=.
+#+begin_src picard
+$set(checkVinylTrackNumber
+	,$if($and($in(%media%,Vinyl),%_musicbrainz_tracknumber%),%_musicbrainz_tracknumber%)
+)
+#+end_src
+
+**** Output only album artist or first from the multiple value field
+Gets the first value of either =%albumartist%= or, =%artist%= and if it is
+a multiple-artists field choose the first value, up untill the
+standard separator "=;=".
+#+begin_src picard
+$set(getAlbumArtistOrFirstOnlyIfMultiple
+	,$if2(
+		$noop(This searches for the first multiple artist separator `;' and truncates after it:)
+		$left($if2(%albumartist%,%artist%),$find($if2(%albumartist%,%artist%),;))
+		,$if2(%albumartist%,%artist%)
+	)
+)
+#+end_src
+
+**** Get channels number if more than 2
+#+begin_src picard
+$set(getMultiChannels
+	,$if($gt(%_channels%,2), %_channels%Ch)
+)
+#+end_src
+
+**** Get either vinyl or normal track numbers
+Complimentary of [[*Check for special vinyl track numbering][Check for special vinyl track numbering]] and
+[[*Track number padding][Track number padding]].
+#+begin_src picard
+$set(getTrackNumberOrVinylIndex
+	,$if2(%checkVinylTrackNumber%,%checkPadTrackNumber%)
+)
+#+end_src
+
+**** Track title truncated
+#+begin_src picard
+$set(getTitleTruncated
+	,$left(%title%,120)
+)
+#+end_src
+
+**** General Format / Directory Structure
+#+begin_src picard
+$set(generalFormat
+	,%getInitial%
+	/
+	%getAlbumArtistOrFirstOnlyIfMultiple%
+	/
+	%getReleaseYear% %getAlbumNameTruncated% %checkPadDiscNumber% [%mediaFormatSpec%]%getMultiChannels%
+	/
+	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+)
+#+end_src
+
+**** Various Artists Format / Directory Structure
+#+begin_src picard
+$set(variousArtistsFormat
+	,%getVariousArtistsRoot%
+	/
+	%getAlbumNameTruncated% %checkPadDiscNumber% %getReleaseYear% [%mediaFormatSpec%]%getMultiChannels%
+	/
+	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+)
+
+#+end_src
+
+**** Replace special characters and multiple spaces
+The following =$rreplace= functions delete special chars if replacing
+with unicode variants using the built-in pluging failed. Also replace
+double or more spaces with just one.
+
+#+begin_src picard
+$set(rreplacePattern,[:?"_*\\]+)
+
+$set(VASanitized
+	,$rreplace($rreplace(%variousArtistsFormat%,%rreplacePattern%,),\\s+, )
+)
+
+$set(generalSanitized
+	,$rreplace($rreplace(%generalFormat%,%rreplacePattern%,),\\s+, )
+)
+#+end_src
+
+**** Output
+Final format for the directory structure, obsfuscated by the variables
+that store it.
+#+begin_src picard
+$if(%notVariousArtists%
+	,%generalSanitized%
+	,%VASanitized%
+)
+
+#+end_src
+
+
+
+*** Note about indentation
+
+- *NOTE*: Indentation is done using TABs because even though Picard
+  doesn't seem to delete them, they should be ignored by filesystems anyway.
+
+  Likewise any SPACE character seen in the script DOES matter and goes
+  to the final filename, if not held by an =$if= statement.
+#+begin_src picard
+$noop(
+		NOTE: Indentation is done using TABs because even though picard doesn't
+		seem to delete them, they should be ignored by filesystems anyway.
+
+		Likewise any SPACE character seen here DOES matter and goes to the
+		final filename if not held by an \$if statement.
+)
+#+end_src
+
+*** Credits
+- Adapted from thebradleys' naming script:
+  [[https://community.metabrainz.org/t/repository-for-neat-file-name-string-patterns-and-tagger-script-snippets/2786/4][Repository for neat file name string patterns and tagger script snippets#4]]
+
+- Influenced by Fatal-Picard-Script:
+  [[https://github.com/rickeymandraque/Fatal-Picard-Script/blob/master/nocomment.picard][rickeymandraque/Fatal-Picard-Script/nocomment.picard]]
+
+*** Version History
+# - 2022-03-23: Initial release 0.2
+- 2022-12-28: Initial release 0.3
