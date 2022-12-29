@@ -1,0 +1,141 @@
+$noop(
+
+	First "ultimate" in 2022-03-23 03:48:04 UTC
+	new in # [2022-12-28 Wed 20:47:41 -03]
+
+	Adaptation from the great thebradleys' naming script \(https://community.metabrainz.org/t/repository-for-neat-file-name-string-patterns-and-tagger-script-snippets/2786/4\).
+
+	With influence of: [[https://github.com/rickeymandraque/Fatal-Picard-Script/blob/master/nocomment.picard][Fatal-Picard-Script/nocomment.picard at master · rickeymandraque/Fatal-Picard-Script]]
+
+	Version 0.3 in # [2022-12-28 Wed 20:49:14 -03]
+)
+
+$noop(
+		NOTE: Indentation is done using TABs because even though picard doesn't
+		seem to delete them, they should be ignored by filesystems anyway.
+
+		Likewise any SPACE character seen here DOES matter and goes to the
+		final filename if not held by an \$if statement.
+)
+
+$set(checkPadDiscNumber
+	,$if2(
+		$if($gte(%totaldiscs%,10000),		$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
+		,$if($gte(%totaldiscs%,1000),		$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
+		,$if($gte(%totaldiscs%,100),		$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
+		,$if($gte(%totaldiscs%,10),			$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
+		,$if($gt(%totaldiscs%,1),				$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
+	)
+)
+
+$set(checkPadTrackNumber
+	,$if2(
+		$if(%_paddedtracknumber%,%_paddedtracknumber%)
+		,$if($gte(%totaltracks%,10000),		$if(%tracknumber%,$num(%tracknumber%,5)),)
+		,$if($gte(%totaltracks%,1000),		$if(%tracknumber%,$num(%tracknumber%,4)),)
+		,$if($gte(%totaltracks%,100),			$if(%tracknumber%,$num(%tracknumber%,3)),)
+		,$if($gte(%totaltracks%,10),			$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,1),				$if(%tracknumber%,$num(%tracknumber%,2)),)
+	)
+)
+
+$set(mediaFormatSpec
+	$noop(DSD is always '1bit' so only output this if greater than 1)
+	,$if($gt(%_bits_per_sample%,1),%_bits_per_sample%bit )
+	$noop(#TODO: Fix Opus output here:)
+	$div(%_sample_rate%,1000)$if($ne($mod(%_sample_rate%,1000),0),.$left($mod(%_sample_rate%,1000),1))kHz
+	$if($not($eq_any(%_extension%,dsf,dff,dsd)),$upper( %_extension%))
+	$if($in(%media%,Vinyl), Vinyl)
+	$noop(Output this before SACD because there are Vinyl rips recorded in DSD)
+	$if($eq_any(%_extension%,dsf,dff,dsd), DSD)
+	$if($in(%media%,SACD), SACD)
+)
+
+$set(getInitial
+	,$left($if2(%albumartist%,%artist%),1)
+)
+
+$set(getVariousArtistsRoot
+	,$if($eq(%albumartist%,Various Artists),[Various Artists])
+)
+
+$set(getReleaseYear
+	,$if2(
+		$if(%originalyear%,[$left(%originalyear%,4)] )
+		,$if(%originaldate%,[$left(%originaldate%,4)] )
+		,$if(%date%,[$left(%date%,4)] )
+	)
+)
+
+$noop( limit album name output to 120 characters )
+$set(getAlbumNameTruncated
+	,$left( $replace(%album%,/,), 120)
+)
+
+$set(notVariousArtists
+	,$ne(%albumartist%,Various Artists)
+)
+
+$set(checkVinylTrackNumber
+	,$if($and($in(%media%,Vinyl),%_musicbrainz_tracknumber%),%_musicbrainz_tracknumber%)
+)
+
+$set(getAlbumArtistOrFirstOnlyIfMultiple
+	,$if2(
+		$noop(This searches for the first multiple artist separator `;' and truncates after it:)
+		$left($if2(%albumartist%,%artist%),$find($if2(%albumartist%,%artist%),;))
+		,$if2(%albumartist%,%artist%)
+	)
+)
+
+$set(getMultiChannels
+	,$if($gt(%_channels%,2), %_channels%Ch)
+)
+
+$set(getTrackNumberOrVinylIndex
+	,$if2(%checkVinylTrackNumber%,%checkPadTrackNumber%)
+)
+
+$set(getTitleTruncated
+	,$left(%title%,120)
+)
+
+$set(generalFormat
+	,%getInitial%
+	/
+	%getAlbumArtistOrFirstOnlyIfMultiple%
+	/
+	%getReleaseYear% %getAlbumNameTruncated% %checkPadDiscNumber% [%mediaFormatSpec%]%getMultiChannels%
+	/
+	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+)
+
+$set(variousArtistsFormat
+	,%getVariousArtistsRoot%
+	/
+	%getAlbumNameTruncated% %checkPadDiscNumber% %getReleaseYear% [%mediaFormatSpec%]%getMultiChannels%
+	/
+	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+)
+
+$set(rreplacePattern,[:?"_]+)
+
+$noop(
+	The following rreplace functions delete special chars if replacing with
+	unicode versions \(using the built-in pluging\) failed.
+	Also replace double or more spaces with just one.
+)
+
+$set(VASanitized
+	,$rreplace($rreplace(%variousArtistsFormat%,%rreplacePattern%,),\\s+, )
+)
+
+$set(generalSanitized
+	,$rreplace($rreplace(%generalFormat%,%rreplacePattern%,),\\s+, )
+)
+
+$if(%notVariousArtists%
+	,%generalSanitized%
+	,%VASanitized%
+)
+
