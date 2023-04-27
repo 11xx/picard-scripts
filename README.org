@@ -1,29 +1,34 @@
+# -*- eval: (require 'picard-mode); -*-
 #+TITLE: MusicBrainz Picard Tagging & Naming Scripts
 * Naming Scripts
 ** =ultimate=: General Naming Script
 :PROPERTIES:
-:header-args: :tangle naming/ultimate.ptsp
+:header-args:picard: :tangle naming/ultimate.ptsp
 :END:
 
 *** Tangling
 "Tangling" is an Org Mode feature that extracts code blocks into a
 target file, see the =:header-args:= metadata for this section.
 
+Also, "noweb" variables are used between =<<= and =>>=, noweb variables are
+expanded on the target file applying the contents of the referred to
+code block.
+
 *** Note about indentation
 
-- *NOTE*: Indentation is done using TABs and NEWLINEs because even
-  though Picard doesn't seem to delete them, they should be ignored by
-  filesystems anyway.
+#+NAME: indentation-note
+#+begin_src text
+NOTE: Indentation is done using TABs and NEWLINEs because even though
+Picard doesn't seem to delete them, they should be ignored by
+filesystems anyway.
 
-  Likewise any SPACE character seen in the script DOES matter and goes
-  to the final filename, if not held by an =$if= statement.
-#+begin_src picard
+Likewise any SPACE character seen in the script DOES matter and goes
+to the final filename, if not held by an if statement.
+#+end_src
+
+#+begin_src picard :noweb yes
 $noop(
-		NOTE: Indentation is done using TABs because even though picard doesn't
-		seem to delete them, they should be ignored by filesystems anyway.
-
-		Likewise any SPACE character seen here DOES matter and goes to the
-		final filename if not held by an \$if statement.
+		<<indentation-note>>
 )
 #+end_src
 
@@ -72,11 +77,11 @@ necessary.
 #+begin_src picard
 $set(checkPadDiscNumber
 	,$if2(
-		$if($gte(%totaldiscs%,10000),		$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
-		,$if($gte(%totaldiscs%,1000),		$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
-		,$if($gte(%totaldiscs%,100),		$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
-		,$if($gte(%totaldiscs%,10),			$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
-		,$if($gt(%totaldiscs%,1),				$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
+		$if($gte(%totaldiscs%,10000),	$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
+		,$if($gte(%totaldiscs%,1000),	$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
+		,$if($gte(%totaldiscs%,100),	$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
+		,$if($gte(%totaldiscs%,10),		$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
+		,$if($gt(%totaldiscs%,1),			$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
 	)
 )
 #+end_src
@@ -88,11 +93,11 @@ number with at least a padding of 2, e.g. "=05=".
 $set(checkPadTrackNumber
 	,$if2(
 		$if(%_paddedtracknumber%,%_paddedtracknumber%)
-		,$if($gte(%totaltracks%,10000),		$if(%tracknumber%,$num(%tracknumber%,5)),)
-		,$if($gte(%totaltracks%,1000),		$if(%tracknumber%,$num(%tracknumber%,4)),)
-		,$if($gte(%totaltracks%,100),			$if(%tracknumber%,$num(%tracknumber%,3)),)
-		,$if($gte(%totaltracks%,10),			$if(%tracknumber%,$num(%tracknumber%,2)),)
-		,$if($gte(%totaltracks%,1),				$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,10000),	$if(%tracknumber%,$num(%tracknumber%,5)),)
+		,$if($gte(%totaltracks%,1000),	$if(%tracknumber%,$num(%tracknumber%,4)),)
+		,$if($gte(%totaltracks%,100),		$if(%tracknumber%,$num(%tracknumber%,3)),)
+		,$if($gte(%totaltracks%,10),		$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,1),			$if(%tracknumber%,$num(%tracknumber%,2)),)
 	)
 )
 #+end_src
@@ -143,9 +148,9 @@ Returns the first value of either =%originalyear%=, =%originaldate%= or
 #+begin_src picard
 $set(getReleaseYear
 	,$if2(
-		$if(%originalyear%,[$left(%originalyear%,4)] )
-		,$if(%originaldate%,[$left(%originaldate%,4)] )
-		,$if(%date%,[$left(%date%,4)] )
+		$if(%originalyear%,[$left(%originalyear%,4)])
+		,$if(%originaldate%,[$left(%originaldate%,4)])
+		,$if(%date%,$left(%date%,4))
 	)
 )
 #+end_src
@@ -181,7 +186,7 @@ Gets the first value of either =%albumartist%= or, =%artist%= and if it is
 a multiple-artists field choose the first value, up untill the
 standard separator "=;=".
 #+begin_src picard
-$set(getAlbumArtistOrFirstOnlyIfMultiple
+$set(getAlbumArtist
 	,$if2(
 		$noop(This searches for the first multiple artist separator `;' and truncates after it:)
 		$left($if2(%albumartist%,%artist%),$find($if2(%albumartist%,%artist%),;))
@@ -201,7 +206,7 @@ $set(getMultiChannels
 Complimentary of [[*Check for special vinyl track numbering][Check for special vinyl track numbering]] and
 [[*Track number padding][Track number padding]].
 #+begin_src picard
-$set(getTrackNumberOrVinylIndex
+$set(getTrackNumber
 	,$if2(%checkVinylTrackNumber%,%checkPadTrackNumber%)
 )
 #+end_src
@@ -218,11 +223,11 @@ $set(getTitleTruncated
 $set(generalFormat
 	,%getInitial%
 	/
-	%getAlbumArtistOrFirstOnlyIfMultiple%
+	%getAlbumArtist%
 	/
-	%getReleaseYear% %getAlbumNameTruncated% %checkPadDiscNumber% [%mediaFormatSpec%]%getMultiChannels%
+	[%getReleaseYear%] %getAlbumNameTruncated% %checkPadDiscNumber% [%mediaFormatSpec%]%getMultiChannels%
 	/
-	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+	%getTrackNumber%. %getTitleTruncated%
 )
 #+end_src
 
@@ -231,16 +236,15 @@ $set(generalFormat
 $set(variousArtistsFormat
 	,%getVariousArtistsRoot%
 	/
-	%getAlbumNameTruncated% %checkPadDiscNumber% %getReleaseYear% [%mediaFormatSpec%]%getMultiChannels%
+	%getAlbumNameTruncated% %checkPadDiscNumber% [%getReleaseYear%] [%mediaFormatSpec%]%getMultiChannels%
 	/
-	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+	%getTrackNumber%. %getTitleTruncated%
 )
-
 #+end_src
 
 **** Replace special characters and multiple spaces
 The following =$rreplace= functions delete special chars if replacing
-with unicode variants using the built-in pluging failed. Also replace
+with unicode variants using the built-in plug-in failed. Also replace
 double or more spaces with just one.
 
 #+begin_src picard
@@ -263,7 +267,6 @@ $if(%notVariousArtists%
 	,%generalSanitized%
 	,%VASanitized%
 )
-
 #+end_src
 
 

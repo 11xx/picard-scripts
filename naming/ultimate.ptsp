@@ -1,29 +1,30 @@
 $noop(
-		NOTE: Indentation is done using TABs because even though picard doesn't
-		seem to delete them, they should be ignored by filesystems anyway.
-
-		Likewise any SPACE character seen here DOES matter and goes to the
-		final filename if not held by an \$if statement.
+		NOTE: Indentation is done using TABs and NEWLINEs because even though
+		Picard doesn't seem to delete them, they should be ignored by
+		filesystems anyway.
+		
+		Likewise any SPACE character seen in the script DOES matter and goes
+		to the final filename, if not held by an if statement.
 )
 
 $set(checkPadDiscNumber
 	,$if2(
-		$if($gte(%totaldiscs%,10000),		$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
-		,$if($gte(%totaldiscs%,1000),		$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
-		,$if($gte(%totaldiscs%,100),		$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
-		,$if($gte(%totaldiscs%,10),			$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
-		,$if($gt(%totaldiscs%,1),				$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
+		$if($gte(%totaldiscs%,10000),	$if(%discnumber%, \(Disc $num(%discnumber%,5)\)),)
+		,$if($gte(%totaldiscs%,1000),	$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
+		,$if($gte(%totaldiscs%,100),	$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
+		,$if($gte(%totaldiscs%,10),		$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
+		,$if($gt(%totaldiscs%,1),			$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
 	)
 )
 
 $set(checkPadTrackNumber
 	,$if2(
 		$if(%_paddedtracknumber%,%_paddedtracknumber%)
-		,$if($gte(%totaltracks%,10000),		$if(%tracknumber%,$num(%tracknumber%,5)),)
-		,$if($gte(%totaltracks%,1000),		$if(%tracknumber%,$num(%tracknumber%,4)),)
-		,$if($gte(%totaltracks%,100),			$if(%tracknumber%,$num(%tracknumber%,3)),)
-		,$if($gte(%totaltracks%,10),			$if(%tracknumber%,$num(%tracknumber%,2)),)
-		,$if($gte(%totaltracks%,1),				$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,10000),	$if(%tracknumber%,$num(%tracknumber%,5)),)
+		,$if($gte(%totaltracks%,1000),	$if(%tracknumber%,$num(%tracknumber%,4)),)
+		,$if($gte(%totaltracks%,100),		$if(%tracknumber%,$num(%tracknumber%,3)),)
+		,$if($gte(%totaltracks%,10),		$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,1),			$if(%tracknumber%,$num(%tracknumber%,2)),)
 	)
 )
 
