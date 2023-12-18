@@ -41,7 +41,7 @@ $set(mediaFormatSpec
 )
 
 $set(getInitial
-	,$left($if2(%albumartist%,%artist%),1)
+	,$upper($left($if2(%albumartist%,%artist%),1))
 )
 
 $set(getVariousArtistsRoot
@@ -50,9 +50,9 @@ $set(getVariousArtistsRoot
 
 $set(getReleaseYear
 	,$if2(
-		$if(%originalyear%,[$left(%originalyear%,4)] )
-		,$if(%originaldate%,[$left(%originaldate%,4)] )
-		,$if(%date%,[$left(%date%,4)] )
+		$if(%originalyear%,[$left(%originalyear%,4)])
+		,$if(%originaldate%,[$left(%originaldate%,4)])
+		,$if(%date%,$left(%date%,4))
 	)
 )
 
@@ -69,7 +69,7 @@ $set(checkVinylTrackNumber
 	,$if($and($in(%media%,Vinyl),%_musicbrainz_tracknumber%),%_musicbrainz_tracknumber%)
 )
 
-$set(getAlbumArtistOrFirstOnlyIfMultiple
+$set(getAlbumArtist
 	,$if2(
 		$noop(This searches for the first multiple artist separator `;' and truncates after it:)
 		$left($if2(%albumartist%,%artist%),$find($if2(%albumartist%,%artist%),;))
@@ -81,7 +81,7 @@ $set(getMultiChannels
 	,$if($gt(%_channels%,2), %_channels%Ch)
 )
 
-$set(getTrackNumberOrVinylIndex
+$set(getTrackNumber
 	,$if2(%checkVinylTrackNumber%,%checkPadTrackNumber%)
 )
 
@@ -89,22 +89,26 @@ $set(getTitleTruncated
 	,$left(%title%,120)
 )
 
+$set(getDiscSubtitle
+	,$if(%discsubtitle%,\(%discsubtitle%\))
+)
+
 $set(generalFormat
 	,%getInitial%
 	/
-	%getAlbumArtistOrFirstOnlyIfMultiple%
+	%getAlbumArtist%
 	/
-	%getReleaseYear% %getAlbumNameTruncated% %checkPadDiscNumber% [%mediaFormatSpec%]%getMultiChannels%
+	[%getReleaseYear%] %getAlbumNameTruncated% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
 	/
-	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+	%getTrackNumber%. %getTitleTruncated%
 )
 
 $set(variousArtistsFormat
 	,%getVariousArtistsRoot%
 	/
-	%getAlbumNameTruncated% %checkPadDiscNumber% %getReleaseYear% [%mediaFormatSpec%]%getMultiChannels%
+	%getAlbumNameTruncated% %checkPadDiscNumber% [%getReleaseYear%] [%mediaFormatSpec%]%getMultiChannels%
 	/
-	%getTrackNumberOrVinylIndex%. %getTitleTruncated%
+	%getTrackNumber%. %getTitleTruncated%
 )
 
 $set(rreplacePattern,[:?"_*\\]+)

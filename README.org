@@ -128,7 +128,7 @@ $set(mediaFormatSpec
 **** Get artist initial
 #+begin_src picard
 $set(getInitial
-	,$left($if2(%albumartist%,%artist%),1)
+	,$upper($left($if2(%albumartist%,%artist%),1))
 )
 #+end_src
 
@@ -218,6 +218,14 @@ $set(getTitleTruncated
 )
 #+end_src
 
+**** Disc subtitle
+Some releases have a "disc subtitle" that specify location or work.
+#+begin_src picard
+$set(getDiscSubtitle
+	,$if(%discsubtitle%,\(%discsubtitle%\))
+)
+#+end_src
+
 **** General Format / Directory Structure
 #+begin_src picard
 $set(generalFormat
@@ -225,7 +233,7 @@ $set(generalFormat
 	/
 	%getAlbumArtist%
 	/
-	[%getReleaseYear%] %getAlbumNameTruncated% %checkPadDiscNumber% [%mediaFormatSpec%]%getMultiChannels%
+	[%getReleaseYear%] %getAlbumNameTruncated% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
 	/
 	%getTrackNumber%. %getTitleTruncated%
 )
@@ -282,5 +290,10 @@ $if(%notVariousArtists%
 - [[https://github.com/rdswift/picard-scripts][rdswift/picard-scripts]]
 
 *** Version History
+- 2023-12-18:
+  + Make sure the artist initial is always uppercased.
+  + Add =%discsubtitle%= to file naming.
+  + Delete redundant space after date.
+
 # - 2022-03-23: Initial release 0.2
 - 2022-12-28: Initial release 0.3
