@@ -137,7 +137,7 @@ Check if =%albumartist%= is =Various Artists= to use that as the artist
 root directory for releases that are such.
 #+begin_src picard
 $set(getVariousArtistsRoot
-	,$if($eq(%albumartist%,Various Artists),[Various Artists])
+	,$if($eq(%albumartist%,Various Artists),Various Artists)
 )
 #+end_src
 
@@ -148,8 +148,8 @@ Returns the first value of either =%originalyear%=, =%originaldate%= or
 #+begin_src picard
 $set(getReleaseYear
 	,$if2(
-		$if(%originalyear%,[$left(%originalyear%,4)])
-		,$if(%originaldate%,[$left(%originaldate%,4)])
+		$if(%originalyear%,$left(%originalyear%,4))
+		,$if(%originaldate%,$left(%originaldate%,4))
 		,$if(%date%,$left(%date%,4))
 	)
 )
@@ -242,7 +242,7 @@ $set(generalFormat
 **** Various Artists Format / Directory Structure
 #+begin_src picard
 $set(variousArtistsFormat
-	,%getVariousArtistsRoot%
+	,[%getVariousArtistsRoot%]
 	/
 	%getAlbumNameTruncated% %checkPadDiscNumber% [%getReleaseYear%] [%mediaFormatSpec%]%getMultiChannels%
 	/
@@ -291,9 +291,15 @@ $if(%notVariousArtists%
 
 *** Version History
 - 2023-12-18:
+  #  =0.4=
   + Make sure the artist initial is always uppercased.
   + Add =%discsubtitle%= to file naming.
   + Delete redundant space after date.
+  + Delete redundant square brackets around =%getReleaseYear%= in favour
+    of formatting in =%generalFormat%= and =%variousArtistsFormat%=
+    instead.
+  + Move square brackets from =%getVariousArtistsRoot%= to
+    =%variousArtistsFormat%=.
 
 # - 2022-03-23: Initial release 0.2
 - 2022-12-28: Initial release 0.3

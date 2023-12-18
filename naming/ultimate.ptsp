@@ -45,13 +45,13 @@ $set(getInitial
 )
 
 $set(getVariousArtistsRoot
-	,$if($eq(%albumartist%,Various Artists),[Various Artists])
+	,$if($eq(%albumartist%,Various Artists),Various Artists)
 )
 
 $set(getReleaseYear
 	,$if2(
-		$if(%originalyear%,[$left(%originalyear%,4)])
-		,$if(%originaldate%,[$left(%originaldate%,4)])
+		$if(%originalyear%,$left(%originalyear%,4))
+		,$if(%originaldate%,$left(%originaldate%,4))
 		,$if(%date%,$left(%date%,4))
 	)
 )
@@ -104,7 +104,7 @@ $set(generalFormat
 )
 
 $set(variousArtistsFormat
-	,%getVariousArtistsRoot%
+	,[%getVariousArtistsRoot%]
 	/
 	%getAlbumNameTruncated% %checkPadDiscNumber% [%getReleaseYear%] [%mediaFormatSpec%]%getMultiChannels%
 	/
