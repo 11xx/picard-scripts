@@ -125,6 +125,15 @@ $set(mediaFormatSpec
 
 #+end_src
 
+**** Get media type
+Check if release type is =single= to append that to file naming
+#+begin_src picard
+$set(getMediaType
+		,$if($eq(%mediatype%,single),\(Single\))
+)
+#+end_src
+
+
 **** Get artist initial
 #+begin_src picard
 $set(getInitial
@@ -233,7 +242,7 @@ $set(generalFormat
 	/
 	%getAlbumArtist%
 	/
-	[%getReleaseYear%] %getAlbumNameTruncated% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
+	[%getReleaseYear%] %getAlbumNameTruncated% %getMediaType% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
 	/
 	%getTrackNumber%. %getTitleTruncated%
 )
@@ -290,6 +299,9 @@ $if(%notVariousArtists%
 - [[https://github.com/rdswift/picard-scripts][rdswift/picard-scripts]]
 
 *** Version History
+- 2023-12-20
+  + Add =%mediatype%= check. If it is =single=, append =(Single)= to the
+    album directory name.
 - 2023-12-18:
   #  =0.4=
   + Make sure the artist initial is always uppercased.
