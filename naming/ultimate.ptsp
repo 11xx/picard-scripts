@@ -40,8 +40,11 @@ $set(mediaFormatSpec
 	$if($in(%media%,SACD), SACD)
 )
 
-$set(getMediaType
-		,$if($eq(%mediatype%,single),\(Single\))
+$set(getReleaseType
+		,\(
+		$if($eq(%releasetype%,single),Single)
+		$if($eq(%releasetype%,ep),EP)
+		\)
 )
 
 $set(getInitial
@@ -102,7 +105,7 @@ $set(generalFormat
 	/
 	%getAlbumArtist%
 	/
-	[%getReleaseYear%] %getAlbumNameTruncated% %getMediaType% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
+	[%getReleaseYear%] %getAlbumNameTruncated% %getReleaseType% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
 	/
 	%getTrackNumber%. %getTitleTruncated%
 )

@@ -128,14 +128,16 @@ $set(mediaFormatSpec
   append a marker string to the album directory name:
   : if($eq(%NOT_ON_MUSICBRAINZ_DB%,true), #NOTONMBDB)
 
-**** Get media type
+**** Get release type
 Check if release type is =single= to append that to file naming
 #+begin_src picard
-$set(getMediaType
-		,$if($eq(%mediatype%,single),\(Single\))
+$set(getReleaseType
+		,\(
+		$if($eq(%releasetype%,single),Single)
+		$if($eq(%releasetype%,ep),EP)
+		\)
 )
 #+end_src
-
 
 **** Get artist initial
 #+begin_src picard
@@ -245,7 +247,7 @@ $set(generalFormat
 	/
 	%getAlbumArtist%
 	/
-	[%getReleaseYear%] %getAlbumNameTruncated% %getMediaType% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
+	[%getReleaseYear%] %getAlbumNameTruncated% %getReleaseType% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
 	/
 	%getTrackNumber%. %getTitleTruncated%
 )
@@ -302,9 +304,14 @@ $if(%notVariousArtists%
 - [[https://github.com/rdswift/picard-scripts][rdswift/picard-scripts]]
 
 *** Version History
-- 2023-12-20
-  + Add =%mediatype%= check. If it is =single=, append =(Single)= to the
-    album directory name.
+- 2024-03-11
+  + Fix 2023-12-20, it shouldn't be =%mediatype%= but =%releasetype%=
+    (whoops).
+  + Add EP to =%releasetype%= check.
+  + Add note about =%NOT_ON_MUSICBRAINZ_DB%= on readme.
+# - 2023-12-20
+#   + Add =%mediatype%= check. If it is =single=, append =(Single)= to the
+#     album directory name.
 - 2023-12-18:
   #  =0.4=
   + Make sure the artist initial is always uppercased.
