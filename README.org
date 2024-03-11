@@ -122,8 +122,11 @@ $set(mediaFormatSpec
 	$if($eq_any(%_extension%,dsf,dff,dsd), DSD)
 	$if($in(%media%,SACD), SACD)
 )
-
 #+end_src
+- Note: I use a special/custom tag for tracking albums that are not in
+  MusicBrainz's databases. Here the following line can be added to
+  append a marker string to the album directory name:
+  : if($eq(%NOT_ON_MUSICBRAINZ_DB%,true), #NOTONMBDB)
 
 **** Get media type
 Check if release type is =single= to append that to file naming
