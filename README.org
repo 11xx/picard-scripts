@@ -81,7 +81,7 @@ $set(checkPadDiscNumber
 		,$if($gte(%totaldiscs%,1000),	$if(%discnumber%, \(Disc $num(%discnumber%,4)\)),)
 		,$if($gte(%totaldiscs%,100),	$if(%discnumber%, \(Disc $num(%discnumber%,3)\)),)
 		,$if($gte(%totaldiscs%,10),		$if(%discnumber%, \(Disc $num(%discnumber%,2)\)),)
-		,$if($gt(%totaldiscs%,1),			$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
+		,$if($gt(%totaldiscs%,1),		$if(%discnumber%, \(Disc $num(%discnumber%,1)\)),)
 	)
 )
 #+end_src
@@ -95,9 +95,9 @@ $set(checkPadTrackNumber
 		$if(%_paddedtracknumber%,%_paddedtracknumber%)
 		,$if($gte(%totaltracks%,10000),	$if(%tracknumber%,$num(%tracknumber%,5)),)
 		,$if($gte(%totaltracks%,1000),	$if(%tracknumber%,$num(%tracknumber%,4)),)
-		,$if($gte(%totaltracks%,100),		$if(%tracknumber%,$num(%tracknumber%,3)),)
-		,$if($gte(%totaltracks%,10),		$if(%tracknumber%,$num(%tracknumber%,2)),)
-		,$if($gte(%totaltracks%,1),			$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,100),	$if(%tracknumber%,$num(%tracknumber%,3)),)
+		,$if($gte(%totaltracks%,10),	$if(%tracknumber%,$num(%tracknumber%,2)),)
+		,$if($gte(%totaltracks%,1),		$if(%tracknumber%,$num(%tracknumber%,2)),)
 	)
 )
 #+end_src
@@ -132,10 +132,8 @@ $set(mediaFormatSpec
 Check if release type is =single= to append that to file naming
 #+begin_src picard
 $set(getReleaseType
-		,\(
-		$if($eq(%releasetype%,single),Single)
-		$if($eq(%releasetype%,ep),EP)
-		\)
+		,$if($eq(%releasetype%,single),\(Single\))
+		$if($eq(%releasetype%,ep),\(EP\))
 )
 #+end_src
 
@@ -240,7 +238,7 @@ $set(getDiscSubtitle
 )
 #+end_src
 
-**** General Format / Directory Structure
+*** General Format / Directory Structure
 #+begin_src picard
 $set(generalFormat
 	,%getInitial%
@@ -253,7 +251,7 @@ $set(generalFormat
 )
 #+end_src
 
-**** Various Artists Format / Directory Structure
+*** Various Artists Format / Directory Structure
 #+begin_src picard
 $set(variousArtistsFormat
 	,[%getVariousArtistsRoot%]
@@ -264,7 +262,7 @@ $set(variousArtistsFormat
 )
 #+end_src
 
-**** Replace special characters and multiple spaces
+*** Replace special characters and multiple spaces
 The following =$rreplace= functions delete special chars if replacing
 with unicode variants using the built-in plug-in failed. Also replace
 double or more spaces with just one.
@@ -281,7 +279,7 @@ $set(generalSanitized
 )
 #+end_src
 
-**** Output
+*** Output
 Final format for the directory structure, obsfuscated by the variables
 that store it.
 #+begin_src picard
@@ -302,26 +300,3 @@ $if(%notVariousArtists%
 
 *** Cool References
 - [[https://github.com/rdswift/picard-scripts][rdswift/picard-scripts]]
-
-*** Version History
-- 2024-03-11
-  + Fix 2023-12-20, it shouldn't be =%mediatype%= but =%releasetype%=
-    (whoops).
-  + Add EP to =%releasetype%= check.
-  + Add note about =%NOT_ON_MUSICBRAINZ_DB%= on readme.
-# - 2023-12-20
-#   + Add =%mediatype%= check. If it is =single=, append =(Single)= to the
-#     album directory name.
-- 2023-12-18:
-  #  =0.4=
-  + Make sure the artist initial is always uppercased.
-  + Add =%discsubtitle%= to file naming.
-  + Delete redundant space after date.
-  + Delete redundant square brackets around =%getReleaseYear%= in favour
-    of formatting in =%generalFormat%= and =%variousArtistsFormat%=
-    instead.
-  + Move square brackets from =%getVariousArtistsRoot%= to
-    =%variousArtistsFormat%=.
-
-# - 2022-03-23: Initial release 0.2
-- 2022-12-28: Initial release 0.3

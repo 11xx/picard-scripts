@@ -47,6 +47,11 @@ $set(getReleaseType
 		\)
 )
 
+$noop( check if ended up empty )
+$set(getReleaseType,
+		$if($eq(%getReleaseType%,\(\)),)
+)
+
 $set(getInitial
 	,$upper($left($if2(%albumartist%,%artist%),1))
 )
@@ -100,12 +105,17 @@ $set(getDiscSubtitle
 	,$if(%discsubtitle%,\(%discsubtitle%\))
 )
 
+$set(getAlbumId
+	$noop( add space at the END, see 'generalFormat' and 'variousArtistsFormat' )
+	,$if(%musicbrainz_albumid%,mbid-$left(%musicbrainz_albumid%,8) )
+)
+
 $set(generalFormat
 	,%getInitial%
 	/
 	%getAlbumArtist%
 	/
-	[%getReleaseYear%] %getAlbumNameTruncated% %getReleaseType% %checkPadDiscNumber% %getDiscSubtitle% [%mediaFormatSpec%]%getMultiChannels%
+	[%getReleaseYear%] %getAlbumNameTruncated% %getReleaseType% %checkPadDiscNumber% %getDiscSubtitle% [%getAlbumId%%mediaFormatSpec%]%getMultiChannels%
 	/
 	%getTrackNumber%. %getTitleTruncated%
 )
@@ -113,7 +123,7 @@ $set(generalFormat
 $set(variousArtistsFormat
 	,[%getVariousArtistsRoot%]
 	/
-	%getAlbumNameTruncated% %checkPadDiscNumber% [%getReleaseYear%] [%mediaFormatSpec%]%getMultiChannels%
+	%getAlbumNameTruncated% %checkPadDiscNumber% [%getReleaseYear%] [%getAlbumId%%mediaFormatSpec%]%getMultiChannels%
 	/
 	%getTrackNumber%. %getTitleTruncated%
 )
